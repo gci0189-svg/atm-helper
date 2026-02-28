@@ -3,184 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATM 短溢款分析助手 (PC280 智慧版)</title>
+    <title>ATM 短溢款智慧分析助手 (PC280)</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f9; color: #333; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 20px; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 25px; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
         
-        .alert-box { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
-        
-        .section { background: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dcdfe6; position: relative; }
+        .section { background: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dcdfe6; }
         .section h2 { margin-top: 0; color: #2980b9; font-size: 18px; margin-bottom: 15px; }
         
         .form-group { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
-        .input-item { display: flex; flex-direction: column; flex: 1; min-width: 280px; }
+        .input-item { display: flex; flex-direction: column; flex: 1; min-width: 240px; }
         label { font-weight: bold; margin-bottom: 8px; color: #555; font-size: 14px; }
         input[type="datetime-local"], input[type="file"] { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        .btn { flex: 1; background-color: #3498db; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.3s; }
+        .btn { background-color: #3498db; color: white; padding: 15px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; font-weight: bold; width: 100%; transition: 0.3s; margin-top: 10px; }
         .btn:hover { background-color: #2980b9; }
-        .btn-secondary { background-color: #95a5a6; font-size: 14px; padding: 5px 10px; }
         
-        /* 仟佰統計卡片 */
+        /* 仟佰分開統計卡片 */
         .summary-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        .card { padding: 20px; border-radius: 10px; color: white; }
+        .card { padding: 20px; border-radius: 10px; color: white; position: relative; overflow: hidden; }
         .card.thousand { background: linear-gradient(135deg, #e67e22, #d35400); }
         .card.hundred { background: linear-gradient(135deg, #3498db, #2980b9); }
         .card-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
-        .card-stats { display: flex; justify-content: space-around; }
-        .stat-group { text-align: center; }
+        .card-stats { display: flex; justify-content: space-between; align-items: center; }
+        .stat-group { text-align: center; flex: 1; }
         .stat-value { font-size: 32px; font-weight: bold; display: block; }
         .stat-label { font-size: 12px; opacity: 0.9; }
-        .total-amount { grid-column: span 2; background: #27ae60; text-align: center; padding: 15px; border-radius: 10px; color: white; font-size: 22px; font-weight: bold; }
+        .total-amount { grid-column: span 2; background: #27ae60; text-align: center; padding: 15px; border-radius: 10px; color: white; font-size: 20px; font-weight: bold; }
 
+        /* 表格樣式 */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 12px; text-align: center; }
-        th { background-color: #f8f9fa; }
-        .val-dispense { color: #27ae60; font-weight: bold; }
-        .val-reject { color: #e74c3c; font-weight: bold; }
+        th { background-color: #f8f9fa; color: #666; }
+        .box-name { font-weight: bold; color: #2c3e50; }
+        .val-dispense { color: #27ae60; font-weight: bold; font-size: 16px; }
+        .val-reject { color: #e74c3c; font-weight: bold; font-size: 16px; }
+        
         #warningArea { display: none; background-color: #fff5f5; border-left: 5px solid #ff4d4d; padding: 15px; margin-top: 20px; border-radius: 5px; }
+        .info-tag { font-size: 12px; color: #7f8c8d; float: right; font-weight: normal; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏧 ATM 短溢款分析助手</h1>
-
-    <div class="alert-box">
-        <strong>⚠️ 重要提示：</strong> 本工具僅能分析「已解密」的文字或 XML 內容。若您的檔案是加密的 <strong>.TRC</strong> 檔，請先使用 Flight Recorder 開啟並 Save/Export 成可讀格式後再行上傳。
-    </div>
+    <h1>🏧 ATM 短溢款智慧分析助手</h1>
 
     <div class="section">
-        <h2>1. 選擇解密後的日誌檔案</h2>
-        <input type="file" id="fileInput" multiple style="width: 100%; box-sizing: border-box;">
-        <p id="fileStatus" style="font-size: 12px; color: #27ae60; margin-top: 5px; font-weight: bold;"></p>
-    </div>
-
-    <div class="section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2 style="margin: 0;">2. 設定時間區間</h2>
-            <button class="btn btn-secondary" onclick="autoDetectTime()">🪄 自動偵測檔案時間</button>
-        </div>
+        <h2>1. 設定分析時間區間 (必填)</h2>
         <div class="form-group">
             <div class="input-item">
-                <label>裝鈔時間 (起始)</label>
+                <label>裝鈔時間 (Start Time)</label>
                 <input type="datetime-local" id="startTime" step="1">
             </div>
             <div class="input-item">
-                <label>卸鈔時間 (結束)</label>
+                <label>卸鈔時間 (End Time)</label>
                 <input type="datetime-local" id="endTime" step="1">
             </div>
         </div>
-        <button class="btn" onclick="analyzeData()">開始智慧分析</button>
+    </div>
+
+    <div class="section">
+        <h2>2. 選擇日誌檔案 (.XML / .TRC)</h2>
+        <div class="form-group">
+            <div class="input-item">
+                <!-- 修正：accept 增加 .trc -->
+                <input type="file" id="fileInput" multiple accept=".xml,.txt,.trc">
+            </div>
+        </div>
+        <button class="btn" onclick="analyzeFiles()">開始自動分析數據</button>
     </div>
 
     <div id="resultSection" style="display: none;">
+        <!-- 仟佰分開統計區域 -->
         <div class="summary-container">
-            <div class="card thousand">
+            <div class="card orange thousand">
                 <div class="card-title">仟元券統計 ($1000)</div>
                 <div class="card-stats">
-                    <div class="stat-group"><span class="stat-value" id="disp1000">0</span><span class="stat-label">發出張數</span></div>
-                    <div class="stat-group"><span class="stat-value" id="rej1000">0</span><span class="stat-label">總拒鈔張數</span></div>
+                    <div class="stat-group">
+                        <span class="stat-value" id="disp1000">0</span>
+                        <span class="stat-label">發出張數</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-value" id="rej1000">0</span>
+                        <span class="stat-label">總拒鈔張數</span>
+                    </div>
                 </div>
             </div>
-            <div class="card hundred">
+            <div class="card blue hundred">
                 <div class="card-title">佰元券統計 ($100)</div>
                 <div class="card-stats">
-                    <div class="stat-group"><span class="stat-value" id="disp100">0</span><span class="stat-label">發出張數</span></div>
-                    <div class="stat-group"><span class="stat-value" id="rej100">0</span><span class="stat-label">總拒鈔張數</span></div>
+                    <div class="stat-group">
+                        <span class="stat-value" id="disp100">0</span>
+                        <span class="stat-label">發出張數</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-value" id="rej100">0</span>
+                        <span class="stat-label">總拒鈔張數</span>
+                    </div>
                 </div>
             </div>
-            <div class="total-amount">客戶提領總計：<span id="totalMoney">NT$ 0</span></div>
+            <div class="total-amount">
+                結帳期間客戶領取總金額：<span id="totalMoney">NT$ 0</span>
+            </div>
         </div>
 
         <div class="section">
-            <h2>📊 詳細數據明細</h2>
+            <h2>📊 詳細鈔箱數據 <span class="info-tag">自動過濾重複的發空(E)紀錄</span></h2>
             <table>
                 <thead>
-                    <tr><th>鈔箱</th><th>面額</th><th>發出 (Disp)</th><th>拒鈔 (Rej)</th><th>合計</th></tr>
+                    <tr>
+                        <th>鈔箱</th>
+                        <th>面額</th>
+                        <th>發出 (Dispense)</th>
+                        <th>拒鈔 (Reject)</th>
+                        <th>合計</th>
+                    </tr>
                 </thead>
                 <tbody id="resultTableBody"></tbody>
             </table>
         </div>
 
         <div id="warningArea">
-            <h3 style="color: #c0392b; margin-top: 0;">⚠️ 異常回收紀錄 (RRET > 0)</h3>
+            <h3 style="color: #c0392b; margin-top: 0;">⚠️ 回收警告 (RRET > 0)</h3>
             <ul id="warningList"></ul>
         </div>
     </div>
 </div>
 
 <script>
-    let globalContent = "";
+    function analyzeFiles() {
+        const fileInput = document.getElementById('fileInput');
+        const startTimeStr = document.getElementById('startTime').value;
+        const endTimeStr = document.getElementById('endTime').value;
 
-    // 當檔案選擇後，預先讀取內容以便自動偵測時間
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-        let files = Array.from(e.target.files);
-        files.sort((a, b) => a.name.localeCompare(b.name));
-        globalContent = "";
-        let readCount = 0;
-        files.forEach(file => {
+        if (fileInput.files.length === 0) {
+            alert("請選擇 LOG 檔案！");
+            return;
+        }
+        if (!startTimeStr || !endTimeStr) {
+            alert("請輸入裝鈔與卸鈔時間，程式才能幫您精準過濾資料！");
+            return;
+        }
+
+        let startTs = new Date(startTimeStr).getTime();
+        let endTs = new Date(endTimeStr).getTime();
+
+        let filesArray = Array.from(fileInput.files);
+        filesArray.sort((a, b) => a.name.localeCompare(b.name));
+
+        let filesProcessed = 0;
+        let combinedContent = "";
+
+        filesArray.forEach(file => {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                globalContent += event.target.result + "\n";
-                readCount++;
-                if(readCount === files.length) {
-                    document.getElementById('fileStatus').innerText = `✅ 已載入 ${files.length} 個檔案，您可以點擊「自動偵測」或手動填寫時間。`;
+            reader.onload = (e) => {
+                combinedContent += e.target.result + "\n";
+                filesProcessed++;
+                if (filesProcessed === filesArray.length) {
+                    processData(combinedContent, startTs, endTs);
                 }
             };
             reader.readAsText(file);
         });
-    });
-
-    function autoDetectTime() {
-        if (!globalContent) { alert("請先選擇檔案！"); return; }
-        const timeRegex = /date="([^"]+)" time="([^"]+)"/g;
-        let matches = [...globalContent.matchAll(timeRegex)];
-        if (matches.length > 0) {
-            // 將格式轉換為 datetime-local 所需的 YYYY-MM-DDTHH:mm:ss
-            let first = `${matches[0][1]}T${matches[0][2]}`;
-            let last = `${matches[matches.length-1][1]}T${matches[matches.length-1][2]}`;
-            document.getElementById('startTime').value = first;
-            document.getElementById('endTime').value = last;
-        } else {
-            alert("找不到時間標籤，請確認是否為解密後的 XML 格式。");
-        }
     }
 
-    function analyzeData() {
-        const startTs = new Date(document.getElementById('startTime').value).getTime();
-        const endTs = new Date(document.getElementById('endTime').value).getTime();
-
-        if (isNaN(startTs) || isNaN(endTs)) {
-            alert("請設定完整的開始與結束時間（包含日期與分秒）。");
-            return;
-        }
-
-        let summary = { 1: { disp:0, rej:0, val:0 }, 2: { disp:0, rej:0, val:0 }, 3: { disp:0, rej:0, val:0 }, 4: { disp:0, rej:0, val:0 } };
+    function processData(content, startTs, endTs) {
+        let summary = {
+            1: { disp: 0, rej: 0, val: 0 },
+            2: { disp: 0, rej: 0, val: 0 },
+            3: { disp: 0, rej: 0, val: 0 },
+            4: { disp: 0, rej: 0, val: 0 }
+        };
         let warnings = [];
         let previousTokens = [];
-        const lines = globalContent.split('\n');
+        const lines = content.split('\n');
 
         lines.forEach(line => {
-            let tMatch = line.match(/date="([^"]+)" time="([^"]+)"/);
-            if (!tMatch) return;
-            let logTime = new Date(`${tMatch[1]}T${tMatch[2]}`).getTime();
+            let timeMatch = line.match(/date="([^"]+)" time="([^"]+)"/);
+            if (!timeMatch) return;
+            let logTime = new Date(`${timeMatch[1]}T${timeMatch[2]}`).getTime();
+
             if (logTime < startTs || logTime > endTs) return;
 
+            // 1. 自動辨識面額
             for(let i=1; i<=4; i++) {
-                let vMatch = line.match(new RegExp(`${i}VAL=0*(\\d+)`));
-                if (vMatch) summary[i].val = parseInt(vMatch[1]);
+                let valMatch = line.match(new RegExp(`${i}VAL=0*(\\d+)`));
+                if (valMatch) summary[i].val = parseInt(valMatch[1]);
             }
 
+            // 2. 統計出鈔與拒鈔
             if (line.includes('type="CNG_DISP_STANDARD"')) {
-                let dMatch = line.match(/>([^<]+)<\/ENTRY>/);
-                if (dMatch) {
-                    let tokens = dMatch[1].replace(/;/g, '').split(':').filter(t => t.trim() !== "");
+                let dispMatch = line.match(/>([^<]+)<\/ENTRY>/);
+                if (dispMatch) {
+                    let tokens = dispMatch[1].replace(/;/g, '').split(':').filter(t => t.trim() !== "");
                     tokens.forEach(token => {
                         if (token.endsWith('E') && previousTokens.includes(token)) return;
+
                         let d = token.split(',');
                         if (d.length >= 3) {
                             let idx = parseInt(d[0]);
@@ -194,27 +213,61 @@
                 }
             }
 
+            // 3. 回收警告
             if (line.includes('type="STCS"')) {
-                let rMatch = line.match(/RRET=([^,;]+)/);
-                if (rMatch && rMatch[1] !== "00") {
-                    warnings.push(`[${tMatch[1]} ${tMatch[2]}] 回收 RRET: ${rMatch[1]}`);
+                let rret = line.match(/RRET=([^,;]+)/);
+                if (rret && rret[1] !== "00") {
+                    warnings.push(`[${timeMatch[1]} ${timeMatch[2]}] 偵測到回收次數(RRET): ${rret[1]}`);
                 }
             }
         });
 
-        render(summary, warnings);
+        renderResult(summary, warnings);
     }
 
-    function render(summary, warnings) {
+    function renderResult(summary, warnings) {
         document.getElementById('resultSection').style.display = 'block';
         const tbody = document.getElementById('resultTableBody');
         tbody.innerHTML = '';
-        let d1000=0, r1000=0, d100=0, r100=0, totalMoney=0;
 
-        for (let i=1; i<=4; i++) {
+        let d1000 = 0, r1000 = 0, d100 = 0, r100 = 0, totalMoney = 0;
+
+        for (let i = 1; i <= 4; i++) {
             let s = summary[i];
             totalMoney += (s.disp * s.val);
+
             if (s.val === 1000) { d1000 += s.disp; r1000 += s.rej; }
             else if (s.val === 100) { d100 += s.disp; r100 += s.rej; }
 
-            tbody.innerHTML += `<tr><td>第 ${i} 箱</td><td style="c
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="box-name">第 ${i} 箱</td>
+                <td style="color:#2980b9;">$${s.val || '?' }</td>
+                <td class="val-dispense">${s.disp}</td>
+                <td class="val-reject">${s.rej}</td>
+                <td style="background:#f9f9f9;">${s.disp + s.rej}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // 更新統計卡片數字
+        document.getElementById('disp1000').innerText = d1000;
+        document.getElementById('rej1000').innerText = r1000;
+        document.getElementById('disp100').innerText = d100;
+        document.getElementById('rej100').innerText = r100;
+        document.getElementById('totalMoney').innerText = 'NT$ ' + totalMoney.toLocaleString();
+
+        const wArea = document.getElementById('warningArea');
+        const wList = document.getElementById('warningList');
+        wList.innerHTML = '';
+        if (warnings.length > 0) {
+            wArea.style.display = 'block';
+            warnings.forEach(w => { let li = document.createElement('li'); li.innerText = w; wList.appendChild(li); });
+        } else { wArea.style.display = 'none'; }
+        
+        // 分析完後滾動到結果區
+        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
