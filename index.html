@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATM 短溢款分析助手 v17.0 (民國年智慧解析版)</title>
+    <title>ATM 短溢款分析助手 v18.0 (極簡降噪版)</title>
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f0f4f8; color: #333; margin: 0; padding: 20px; }
         .container { max-width: 1050px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         h1 { color: #2c3e50; text-align: center; margin-bottom: 25px; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
         .section { background: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dcdfe6; }
         .section h2 { margin-top: 0; color: #2980b9; font-size: 18px; margin-bottom: 15px; }
-        .form-group { display: flex; gap: 15px; margin-bottom: 5px; flex-wrap: wrap; }
+        .form-group { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .input-item { display: flex; flex-direction: column; flex: 1; min-width: 300px; }
         label { font-weight: bold; margin-bottom: 8px; color: #555; font-size: 14px; }
         input[type="text"], input[type="file"] { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; font-family: 'Courier New', monospace; }
         .btn { background-color: #3498db; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; font-weight: bold; width: 100%; transition: 0.3s; margin-top: 10px; }
         .btn:hover { background-color: #2980b9; }
         .btn-auto { background-color: #27ae60; color: white; padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-
+        
         /* 字典區塊 */
         .dict-box { background: #e8f4f8; border: 2px dashed #3498db; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         .dict-input-group { display: flex; gap: 10px; margin-bottom: 10px; }
@@ -56,15 +56,18 @@
         th { background-color: #f8f9fa; }
         .val-dispense { color: #27ae60; font-weight: bold; }
         .val-reject { color: #e74c3c; font-weight: bold; }
+        
+        /* 異常警告區 */
         #warningArea { display: none; background-color: #fff5f5; border: 1px solid #feb2b2; border-left: 5px solid #f56c6c; padding: 15px; margin-top: 20px; border-radius: 5px; }
-        .warning-item { margin-bottom: 5px; font-size: 13px; list-style: none; border-bottom: 1px dashed #fed7d7; padding-bottom: 5px; }
+        .warning-item { margin-bottom: 5px; font-size: 14px; list-style: none; border-bottom: 1px dashed #fed7d7; padding-bottom: 5px; color: #c0392b; font-weight: 500;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏧 ATM 短溢款分析助手 <span style="font-size: 16px;">(v17.0 支援民國年解析)</span></h1>
+    <h1>🏧 ATM 短溢款分析助手 <span style="font-size: 16px;">(v18.0)</span></h1>
 
+    <!-- 獨立查詢字典區 -->
     <div class="dict-box">
         <h2 style="margin-top: 0; color: #2c3e50; font-size: 16px;">📖 Wincor 硬體故障碼 (16碼) 翻譯字典</h2>
         <div class="dict-input-group">
@@ -76,20 +79,19 @@
 
     <div class="section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2 style="margin: 0;">1. 設定分析區間 (支援直接貼上日誌文字)</h2>
+            <h2 style="margin: 0;">1. 設定分析區間</h2>
             <button class="btn-auto" onclick="autoDetect()">🪄 自動填入檔案時間</button>
         </div>
         <div class="form-group">
             <div class="input-item">
                 <label>裝鈔時間 (起始)</label>
-                <input type="text" id="startFull" placeholder="例: 115/03/05 15:25:57 SOP OK">
+                <input type="text" id="startFull" placeholder="YYYY-MM-DD HH:MM:SS">
             </div>
             <div class="input-item">
                 <label>卸鈔時間 (結束)</label>
-                <input type="text" id="endFull" placeholder="例: 2021/09/01 05:20:44">
+                <input type="text" id="endFull" placeholder="YYYY-MM-DD HH:MM:SS">
             </div>
         </div>
-        <p style="font-size: 12px; color: #e67e22; margin-top: 5px;">💡 小提示：您可以直接把交易日誌的時間「整行複製貼上」，系統會自動忽略後面的英文並辨識民國年！</p>
     </div>
 
     <div class="section">
@@ -100,11 +102,13 @@
 
     <div id="resultSection" style="display: none;">
 
+        <!-- 模組硬體與自我修復分析 -->
         <div class="hardware-box" id="hwSection">
-            <div class="hardware-title">⚙️ 模組硬體故障與自我修復追蹤</div>
+            <div class="hardware-title">⚙️ 模組硬體故障與系統排鈔追蹤</div>
             <div id="hwList"></div>
         </div>
 
+        <!-- RACT 實張稽核 -->
         <div class="ract-audit">
             <div class="audit-info">
                 📑 <b>拒鈔箱「實張新增」稽核 (總帳比對)：</b><br>
@@ -146,30 +150,65 @@
             </table>
         </div>
 
+        <!-- 取消了正常提款紀錄，只保留真正的異常 -->
         <div id="warningArea">
-            <h3 style="color: #c53030; margin-top: 0;">⚠️ 關鍵異常狀態 (RACT / 回收)</h3>
+            <h3 style="color: #c53030; margin-top: 0;">🚨 客戶忘記取款(回收) 與 通道卡鈔警告</h3>
             <div id="warningList"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Wincor 字典 ---
+    // --- 字典更新：將 0150 改為 出鈔機總成 (Double Extractor) ---
     const wincorDB = {
-        classes: { "0070": "鈔箱模組", "0090": "夾鈔爪機構", "00A0": "離合器", "00E0": "收集區/疊鈔區", "00E8": "收集區/疊鈔區(HDM)", "0150": "出鈔機總成", "0160": "出鈔通道", "0260": "主馬達", "0290": "出鈔口通道", "02A0": "壓力調節器", "0310": "光學感應器", "0330": "出鈔閘門", "0332": "出鈔閘門", "0340": "單張拒鈔模組", "0360": "疊鈔輪", "0370": "設備狀態機" },
-        components: { "0610": "第1層感應器", "0620": "第2層感應器", "0630": "第3層感應器", "0640": "第4層感應器", "0800": "通道感應器 PS1", "1710": "第1層鈔箱", "1720": "第2層鈔箱", "1730": "第3層鈔箱", "1740": "第4層鈔箱", "1810": "主馬達(DCM1)", "1820": "夾鈔爪驅動馬達", "1830": "夾鈔爪皮帶馬達", "1860": "單張拒鈔閘門", "1880": "疊鈔輪", "1910": "出鈔閘門", "1970": "出鈔口傳送通道", "1990": "出鈔機總成" },
-        errors: { "0010": "LIGHT_JAM/INVALID_NOTE (未進鈔/異常鈔)", "0020": "DARK_JAM/DISPENSE_FAILED (感應器遭遮蔽/殘留卡鈔/出鈔失敗)", "0030": "UNEXPECTED_NOTE/DOUBLE_NOTES (不明鈔票出現/發生重疊連鈔)", "0040": "INVALID_NOTES/POSITION_NOT_REACHED (鈔票尺寸異常/馬達無法到位)", "0050": "EMPTY_ERROR/HW_FAILURE (出鈔時鈔箱空/硬體故障)", "0070": "NO_DISPENSE (無法出鈔)", "0080": "RETRACT_FAILED (回收失敗)", "0090": "NOTE_STUCK/REJECT_FAILED (鈔票卡在出鈔口/拒鈔失敗)", "00A0": "CLAMP_OPEN_FAILED (夾鈔爪無法張開)", "00B0": "CLAMP_CLOSE_FAILED (夾鈔爪無法關閉)", "0100": "TRANSPORT_FAILED/CLAMP_EMPTY (通道傳送失敗/夾鈔爪異常為空)", "0120": "DRIVE_TO_SHUTTER_FAILED (傳送至閘門失敗)", "01C0": "TRANSPORT_EJECT_DARK_JAM (吐鈔卡鈔)", "01E0": "TRANSPORT_RETRACT_LIGHT_JAM (回收卡鈔)" }
+        classes: {
+            "0070": "鈔箱模組 (CASSETTE)",
+            "0090": "夾鈔爪機構 (CLAMP)",
+            "00A0": "離合器 (CLUTCH)",
+            "00E0": "收集區/疊鈔區 (COLLECTOR)",
+            "00E8": "收集區/疊鈔區 (COLLECTOR_HDM)",
+            "0150": "出鈔機總成 (Double Extractor)",
+            "0160": "出鈔傳送通道 (DISPENSE_TRANSPORT)",
+            "0260": "主馬達 (MAIN_MOTOR)",
+            "0290": "出鈔口傳送通道 (OUTPUT_TRANSPORT)",
+            "02A0": "壓力調節器 (PRESSURE_REGULATOR)",
+            "0310": "光學感應器 (SCAN_PHOTO_SENSOR)",
+            "0330": "出鈔閘門 (SHUTTER)",
+            "0332": "出鈔閘門 (OUT_SAFE_SHUTTER)",
+            "0340": "單張拒鈔模組 (SINGLE_REJECT_TRAY)",
+            "0360": "疊鈔輪 (STACKER_WHEEL)",
+            "0370": "設備狀態機 (STATE_MACHINE)"
+        },
+        components: {
+            "0610": "第 1 層鈔箱分鈔感應器", "0620": "第 2 層鈔箱分鈔感應器", "0630": "第 3 層鈔箱分鈔感應器", "0640": "第 4 層鈔箱分鈔感應器",
+            "0800": "通道感應器 PS1 (Stacker input)",
+            "1710": "第 1 層鈔箱", "1720": "第 2 層鈔箱", "1730": "第 3 層鈔箱", "1740": "第 4 層鈔箱",
+            "1810": "主馬達 (DCM1)", "1820": "夾鈔爪驅動馬達", "1830": "夾鈔爪皮帶馬達", "1860": "單張拒鈔閘門",
+            "1880": "疊鈔輪 (Stacker Wheel)", "1910": "出鈔閘門 (Shutter)", "1970": "出鈔口傳送通道", "1990": "出鈔機整體模組"
+        },
+        errors: {
+            "0010": "LIGHT_JAM 或 INVALID_NOTE (未進鈔/鈔票未達預定位置/異常鈔)",
+            "0020": "DARK_JAM 或 DISPENSE_FAILED (感應器遭遮蔽/殘留卡鈔/出鈔失敗)",
+            "0030": "UNEXPECTED_NOTE 或 DOUBLE_NOTES (不明鈔票出現/發生重疊連鈔)",
+            "0040": "INVALID_NOTES 或 POSITION_NOT_REACHED (鈔票尺寸異常/馬達無法到位)",
+            "0050": "EMPTY_ERROR 或 HW_FAILURE (出鈔時鈔箱空/硬體嚴重故障)",
+            "0070": "NO_DISPENSE (無法出鈔/重試次數耗盡)",
+            "0080": "RETRACT_FAILED 或 CLOSE_BLOCKED (回收失敗/閘門關閉受阻)",
+            "0090": "NOTE_STUCK 或 REJECT_FAILED (鈔票卡在出鈔口/單張拒鈔失敗)",
+            "00A0": "CLAMP_OPEN_FAILED (夾鈔爪無法張開)",
+            "00B0": "CLAMP_CLOSE_FAILED (夾鈔爪無法關閉)",
+            "0100": "TRANSPORT_FAILED 或 CLAMP_EMPTY (通道傳送失敗/夾鈔爪異常為空)",
+            "0120": "DRIVE_TO_SHUTTER_FAILED (傳送至閘門失敗)",
+            "01C0": "TRANSPORT_EJECT_DARK_JAM (吐鈔卡鈔/閘門感應器遮蔽逾時)",
+            "01E0": "TRANSPORT_RETRACT_LIGHT_JAM (回收卡鈔/鈔票未成功退回)"
+        }
     };
 
     function decodeWincorError(hex) {
         hex = hex.toUpperCase().trim();
         if(hex.length !== 16 || hex === "0000000000000000") return null;
         let cls = hex.substring(0,4), cmp = hex.substring(4,8), err = hex.substring(8,12);
-        return { 
-            clsDesc: wincorDB.classes[cls] || "未知模組", 
-            cmpDesc: wincorDB.components[cmp] || "未知零件", 
-            errDesc: wincorDB.errors[err] || "未定義代碼" 
-        };
+        return { clsDesc: wincorDB.classes[cls] || "未知模組", cmpDesc: wincorDB.components[cmp] || "未知零件", errDesc: wincorDB.errors[err] || "未定義代碼" };
     }
 
     function lookupDict() {
@@ -182,40 +221,20 @@
             return;
         }
         resDiv.style.display = 'block';
-        resDiv.innerHTML = `
-            <div style="margin-bottom: 8px;"><span class="tag tag-class">類別</span> ${decoded.clsDesc}</div>
-            <div style="margin-bottom: 8px;"><span class="tag tag-comp">零件</span> ${decoded.cmpDesc}</div>
-            <div><span class="tag tag-err">原因</span> <b>${decoded.errDesc}</b></div>
-        `;
+        resDiv.innerHTML = `<div style="margin-bottom: 8px;"><span class="tag tag-class">類別</span> ${decoded.clsDesc}</div>
+                            <div style="margin-bottom: 8px;"><span class="tag tag-comp">零件</span> ${decoded.cmpDesc}</div>
+                            <div><span class="tag tag-err">原因</span> <b>${decoded.errDesc}</b></div>`;
     }
 
-    // 💡 最強時間翻譯機：支援擷取字串、民國年轉換
     function parseCustomDate(inputStr) {
         if (!inputStr) return NaN;
-        
-        // 正則表達式：抓取 YYYY/MM/DD 或 YY/MM/DD 以及 HH:MM:SS，忽略後面的任何文字
         const regex = /(\d{2,4})[\/\-](\d{1,2})[\/\-](\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})/;
         const match = inputStr.match(regex);
-        
         if (match) {
             let year = parseInt(match[1], 10);
-            let month = match[2].padStart(2, '0');
-            let day = match[3].padStart(2, '0');
-            let hour = match[4].padStart(2, '0');
-            let min = match[5].padStart(2, '0');
-            let sec = match[6].padStart(2, '0');
-
-            // 判斷是否為民國年 (如果數字小於 1911，例如 115，就加上 1911)
-            if (year < 1911) {
-                year += 1911;
-            }
-
-            // 組合回標準 ISO 格式給 Date() 解析
-            let isoString = `${year}-${month}-${day}T${hour}:${min}:${sec}`;
-            return new Date(isoString).getTime();
+            if (year < 1911) year += 1911; // 處理民國年
+            return new Date(`${year}-${match[2].padStart(2,'0')}-${match[3].padStart(2,'0')}T${match[4].padStart(2,'0')}:${match[5].padStart(2,'0')}:${match[6].padStart(2,'0')}`).getTime();
         }
-        
-        // 防呆：如果正則沒抓到，就用原本最笨的方法硬轉
         return new Date(inputStr.trim().replace(/\//g, '-').replace(' ', 'T')).getTime();
     }
 
@@ -228,10 +247,7 @@
         let loaded = 0;
         files.forEach(f => {
             const r = new FileReader();
-            r.onload = (event) => {
-                combinedLogs += event.target.result + "\n";
-                loaded++;
-            };
+            r.onload = (event) => { combinedLogs += event.target.result + "\n"; loaded++; };
             r.readAsText(f);
         });
     });
@@ -248,22 +264,11 @@
 
     function startAnalysis() {
         if (!combinedLogs) { alert("請選擇檔案！"); return; }
-        
-        // 使用全新的 parseCustomDate 來處理使用者貼上的文字
         const startTs = parseCustomDate(document.getElementById('startFull').value);
         const endTs = parseCustomDate(document.getElementById('endFull').value);
+        if (isNaN(startTs) || isNaN(endTs)) { alert("日期格式讀取失敗！"); return; }
 
-        if (isNaN(startTs) || isNaN(endTs)) {
-            alert("日期格式讀取失敗！請確保貼上的文字包含 YYYY/MM/DD HH:MM:SS 的結構。");
-            return;
-        }
-
-        let summary = { 
-            1:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0}, 
-            2:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0}, 
-            3:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0}, 
-            4:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0} 
-        };
+        let summary = { 1:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0}, 2:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0}, 3:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0}, 4:{d:0, r:0, v:0, s:'', startRej:-1, endRej:0} };
         let warnings = [];
         let hwEvents = [];
         let prevTokens = [];
@@ -279,6 +284,7 @@
             
             if (logTs < startTs || logTs > endTs) return;
 
+            // 1. 硬體故障掃描
             if (line.includes('type="STDV"')) {
                 let errMatch = line.match(/ERROR=([0-9A-F]{16})/);
                 if (errMatch && errMatch[1] !== "0000000000000000") {
@@ -289,10 +295,12 @@
                 }
             }
 
+            // 2. REJECT 動作
             if (line.includes('<COMMAND') && line.includes('type="REJECT"')) {
-                hwEvents.push(`<div class="hw-item" style="color:#d35400; font-weight:bold;">[${timeStr}] ⚠️ 系統觸發 REJECT 動作 (排鈔入拒鈔箱)</div>`);
+                hwEvents.push(`<div class="hw-item" style="color:#d35400; font-weight:bold;">[${timeStr}] ⚠️ 系統觸發 REJECT 動作 (機器正嘗試排除通道卡鈔入拒鈔箱)</div>`);
             }
 
+            // 3. 抓取 RACT 與 單匣 nREJ
             if (line.includes('type="STCS"')) {
                 let ractM = line.match(/RACT=([0-9]+)/);
                 if (ractM) {
@@ -340,11 +348,17 @@
                 }
             }
 
+            // --- 🚨 修正：只保留真正的異常警告 (去除 MON=W) ---
             let ractFullM = line.match(/RACT=([0-9A-F]+)/);
             if (ractFullM && ractFullM[1] === '0110') {
-                warnings.push(`[${timeStr}] ⚠️ 偵測到通道殘留鈔票 (RACT:0110)`);
+                warnings.push(`[${timeStr}] ⚠️ 偵測到通道殘留鈔票代碼 (RACT:0110)`);
             }
-            if (line.includes('MON=W')) warnings.push(`[${timeStr}] ℹ️ 客戶手動取走現金`);
+            
+            // 抓取 RRET (客戶未取款，機器回收)
+            let rretM = line.match(/RRET=([^,; ]+)/);
+            if (rretM && rretM[1] !== "00") {
+                warnings.push(`[${timeStr}] 🚨 客戶逾時未取款，機器已將現金收回 (RRET: ${rretM[1]})`);
+            }
         });
 
         renderFinal(summary, [...new Set(warnings)], hwEvents, firstRACT, lastRACT, sumNRej);
@@ -359,9 +373,7 @@
         if (hwEvents.length > 0) {
             hwSec.style.display = 'block';
             hwEvents.forEach(h => hwList.innerHTML += h);
-        } else {
-            hwSec.style.display = 'none';
-        }
+        } else { hwSec.style.display = 'none'; }
 
         const tbody = document.getElementById('resultTableBody');
         tbody.innerHTML = '';
